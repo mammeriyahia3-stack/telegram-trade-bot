@@ -1,7 +1,7 @@
 import requests
 
 # --- Your bot details ---
-BOT_TOKEN = "8477335303:AAHCfy0lzY0Xo_elXNrTRwjFR-fngzI5HG8"
+BOT_TOKEN = "8293039835:AAH2sLDHfPEWS7fQZY66LkeS-MWdzss9uJw"
 CHAT_ID = "7939950441"
 
 # --- Your message ---
@@ -20,5 +20,6 @@ try:
     print(response.json())  # Show Telegram's response
 except Exception as e:
     print("❌ Failed to send message:", e)
+
 
   
