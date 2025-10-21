@@ -20,7 +20,7 @@ def send_to_telegram(message):
 # --- Route to receive webhook from TradingView ---
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    data = request.json
+    data = request.get_json()
 
     if not data:
         return {"status": "error", "message": "No data received"}, 400
@@ -35,18 +35,49 @@ def webhook():
         # Build fancy message
         emoji = "🔼" if signal.lower() == "buy" else "🔽"
         message = f"""
-{emoji} *{signal.upper()} SIGNAL*  
-💰 *Pair:* {pair}  
-🕒 *Time:* {now}  
-⚙️ *Source:* TradingView  
+{emoji} *{signal.upper()} SIGNAL*
+💰 *Pair:* {pair}
+🕒 *Time:* {now}
+📊 *Source:* TradingView
 """
         send_to_telegram(message)
-        return {"status": "success", "message": "Signal sent to Telegram!"}, 200
+        return {"status": "success", "message": "Signal sent to Telegram"}, 200
     else:
-        return {"status": "error", "message": "No signal key found"}, 400
+        return {"status": "error", "message": "No signal found"}, 400
 
 
-# --- Start the Flask server ---
+# --- Route to handle Telegram messages ---
+@app.route('/', methods=['POST'])
+def telegram_webhook():
+    data = request.get_json()
+
+    if not data or "message" not in data:
+        return {"status": "error", "message": "No message data"}, 400
+
+    chat_id = data["message"]["chat"]["id"]
+    text = data["message"].get("text", "").lower()
+
+    # Simple replies
+    if text == "/start":
+        message = "Hello Yahya 👋, your trading bot is active and connected!"
+    elif "hi" in text or "hello" in text:
+        message = "Hey Yahya! The bot is running perfectly on Render 🚀"
+    else:
+        message = f"You said: {text}"
+
+    payload = {"chat_id": chat_id, "text": message}
+    requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", data=payload)
+
+    return {"ok": True}, 200
+
+
+# --- Route to test bot from browser ---
+@app.route('/', methods=['GET'])
+def home():
+    return "✅ Yahya's Trading Bot is Live and Ready!", 200
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
+
 
